@@ -13,36 +13,46 @@ namespace FileTimeEditor
 
         private void SelectButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            var createTime = CreateTime.SelectedDateTime;
-            var updateTime = UpdateTime.SelectedDateTime;
-
-            if (createTime == null && updateTime == null)
+            if (CreateTime.SelectedDateTime == null && UpdateTime.SelectedDateTime == null)
             {
-                MessageBox.Show(this, "请至少选择创建时间或更新时间", "请选择", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, "请至少选择一个时间", "请选择", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             var openFileDialog = new Microsoft.Win32.OpenFileDialog()
             {
-                Filter = "All files (*.*)|*.*"
+                Filter = "All files (*.*)|*.*",
+                Multiselect = true,
             };
             var result = openFileDialog.ShowDialog();
             if (result != true)
             {
                 return;
             }
-            var file = openFileDialog.FileName;
+            var files = openFileDialog.FileNames;
+            if (files.Length == 0) return;
 
-            if (updateTime != null)
-            {
-                File.SetLastWriteTime(file, updateTime.Value);
-            }
-            if (createTime != null)
-            {
-                File.SetCreationTime(file, createTime.Value);
-            }
+            UpdateFilesTime(files);
 
             MessageBox.Show(this, "设置完成", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void UpdateFilesTime(string[] files)
+        {
+            var createTime = CreateTime.SelectedDateTime;
+            var updateTime = UpdateTime.SelectedDateTime;
+
+            foreach (var file in files)
+            {
+                if (updateTime != null)
+                {
+                    File.SetLastWriteTime(file, updateTime.Value);
+                }
+                if (createTime != null)
+                {
+                    File.SetCreationTime(file, createTime.Value);
+                }
+            }
         }
     }
 }
